@@ -1,0 +1,17 @@
+# Flutter related files
+**/build/
+**/ios/
+**/android/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+
+# Next.js related files
+**/.next/
+**/.vercel/
+**/.env.local
+
+# Node.js dependencies
+**/node_modules/
+
+# .env files
+*.env
