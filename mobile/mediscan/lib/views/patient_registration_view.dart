@@ -23,7 +23,7 @@ class _PatientRegistrationViewState extends State<PatientRegistrationView> {
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
   final _diagnosisController = TextEditingController();
-  final uuid = Uuid();
+  final uuid = const Uuid();
 
   File? _imageFile;
   String? _uploadedImageUrl;

@@ -1,6 +1,5 @@
-Here's a `README.md` file for your Next.js admin dashboard:
 
-```markdown
+
 # MediScan - Admin Dashboard
 
 The MediScan Admin Dashboard is built using Next.js and provides an interface for managing patients, doctors, and other administrative tasks related to the MediScan application.

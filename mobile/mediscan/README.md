@@ -1,5 +1,5 @@
 
-```markdown
+
 # MediScan - Mobile Application
 
 MediScan is a mobile application designed for doctors to register and diagnose patients using machine learning. This document provides comprehensive instructions for setting up and running the mobile app.

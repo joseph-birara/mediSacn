@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
-import '../models/login_response.dart';
 
 class AuthState extends ChangeNotifier {
   final AuthService _authService = AuthService();

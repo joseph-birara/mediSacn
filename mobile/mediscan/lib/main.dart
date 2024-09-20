@@ -15,7 +15,7 @@ void main() {
       ChangeNotifierProvider(create: (_) => PatientState()),
       ChangeNotifierProvider(create: (_) => ProfileState()),
     ],
-    child: MyApp(),
+    child: const MyApp(),
   ));
 }
 
@@ -32,8 +32,8 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => LoginView(),
-        '/patientList': (context) => PatientListView(),
+        '/': (context) => const LoginView(),
+        '/patientList': (context) => const PatientListView(),
       },
     );
   }

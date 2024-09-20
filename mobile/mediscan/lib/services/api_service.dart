@@ -12,10 +12,7 @@ class ApiService {
 
   // Register a patient
   Future<bool> registerPatient(Patient patient) async {
-    final token = _authService.getToken(); // Get token from AuthService
-    if (token == null) {
-      throw Exception('No token available'); // Handle missing token
-    }
+    final token = _authService.getToken();
 
     final url = Uri.parse('$baseUrl/patients');
     final response = await http.post(
@@ -36,10 +33,7 @@ class ApiService {
 
   // Fetch all patients
   Future<List<Patient>> fetchPatients() async {
-    final token = _authService.getToken(); // Get token from AuthService
-    if (token == null) {
-      throw Exception('No token available'); // Handle missing token
-    }
+    final token = _authService.getToken();
 
     final url = Uri.parse('$baseUrl/patients');
     final response = await http.get(

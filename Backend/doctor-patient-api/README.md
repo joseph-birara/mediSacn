@@ -1,6 +1,4 @@
-Here’s a basic `README.md` file for your Node.js and Express backend API:
 
-```markdown
 # MediScan - Backend API
 
 The MediScan backend API is designed to support the MediScan mobile application, providing endpoints for doctor authentication and patient management.

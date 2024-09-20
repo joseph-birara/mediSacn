@@ -1,6 +1,4 @@
 
-
-```markdown
 # MediScan
 
 MediScan is a comprehensive healthcare application designed to facilitate the registration and diagnosis of patients, including features for doctors and an admin dashboard for managing the system.
