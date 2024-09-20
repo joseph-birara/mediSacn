@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:uuid/uuid.dart';
 import '../state/patient_state.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:tflite/tflite.dart';
 
 class PatientRegistrationView extends StatefulWidget {
   const PatientRegistrationView({super.key});
@@ -30,6 +31,21 @@ class _PatientRegistrationViewState extends State<PatientRegistrationView> {
   // Image picker instance
   final ImagePicker _picker = ImagePicker();
 
+  @override
+  void initState() {
+    super.initState();
+    _loadModel();
+  }
+
+  // Load the TFLite model
+  Future<void> _loadModel() async {
+    String? result = await Tflite.loadModel(
+      model: "assets/model.tflite",
+      labels: "assets/labels.txt", // If you have a labels file
+    );
+    print(result);
+  }
+
   // Function to pick image
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -37,8 +53,33 @@ class _PatientRegistrationViewState extends State<PatientRegistrationView> {
       setState(() {
         _imageFile = File(pickedFile.path);
       });
+
+      // Run TFLite model on the selected image
+      _predictImage(_imageFile!);
+
       // Upload the image to Cloudinary
       _uploadImageToCloudinary(_imageFile!);
+    }
+  }
+
+  // Function to run prediction using the TFLite model
+  Future<void> _predictImage(File image) async {
+    var result = await Tflite.runModelOnImage(
+      path: image.path, // Path to the image file
+      imageMean: 0.0,
+      imageStd: 255.0,
+      numResults: 2, // Assuming two classes (TB or not TB)
+      threshold: 0.5,
+    );
+
+    if (result != null && result.isNotEmpty) {
+      setState(() {
+        // Assuming the result is a list of predictions with confidence values
+        _diagnosisController.text = result[0]
+            ['label']; // Store the predicted label in the diagnosis field
+      });
+    } else {
+      print('No prediction result.');
     }
   }
 
@@ -79,7 +120,7 @@ class _PatientRegistrationViewState extends State<PatientRegistrationView> {
         id: uuid.v4(), // Generate a unique ID for the patient
         name: _nameController.text,
         age: int.parse(_ageController.text),
-        diagnosis: _diagnosisController.text,
+        diagnosis: _diagnosisController.text, // Use the predicted diagnosis
         imageUrl: _uploadedImageUrl ?? '', // Set uploaded image URL
       );
 

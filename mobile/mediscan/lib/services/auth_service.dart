@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/login_response.dart';
 
 class AuthService {
-  // Backend API endpoint for login
   final String apiUrl =
       'https://your-backend-url.com/api'; // Replace with your actual API URL
 
@@ -37,25 +36,21 @@ class AuthService {
     }
   }
 
-  // Check if the user is already logged in
   Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.containsKey('token');
   }
 
-  // Log out the doctor and remove the token
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
   }
 
-  // Retrieve the token from shared preferences
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
   }
 
-  // Helper method to add the token to API requests
   Future<Map<String, String>> getAuthHeaders() async {
     final token = await getToken();
     return {
