@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 
 // Define the Patient interface
 export interface Patient {
-  _id?: ObjectId;
+  _id: ObjectId;
   name: string;
   age: number;
     phone: string;
@@ -12,7 +12,9 @@ export interface Patient {
 
 // Existing User interface
 export interface User {
-  _id?: ObjectId;
+  image: any;
+  phone: String;
+  _id: ObjectId;
   name: string;
   email: string;
   password: string;

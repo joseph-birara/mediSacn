@@ -1,4 +1,37 @@
+"use client";
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+import { FaSignOutAlt } from 'react-icons/fa'; // Importing logout icon
+import { useRouter } from 'next/navigation';
+
 export default function DashboardPage() {
+  const router = useRouter();
+  const [totalPatients, setTotalPatients] = useState(0);
+  const [totalDoctors, setTotalDoctors] = useState(0);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const patientsResponse = await axios.get('/api/dashboard/patients');
+        const doctorsResponse = await axios.get('/api/dashboard/doctors');
+        
+        setTotalPatients(patientsResponse.data.length); // Assuming response is an array
+        setTotalDoctors(doctorsResponse.data.length); // Assuming response is an array
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleLogout = () => {
+    // Add your logout logic here (e.g., clear user session, tokens, etc.)
+    // For example:
+    // localStorage.removeItem('token');
+    router.push('/login'); // Redirect to login page
+  };
+
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
@@ -27,17 +60,22 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
             <h3 className="text-xl font-semibold text-gray-700">Total Patients</h3>
-            <p className="mt-4 text-2xl font-bold text-indigo-600">123</p>
+            <p className="mt-4 text-2xl font-bold text-indigo-600">{totalPatients}</p>
           </div>
           <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
             <h3 className="text-xl font-semibold text-gray-700">Total Doctors</h3>
-            <p className="mt-4 text-2xl font-bold text-indigo-600">45</p>
-          </div>
-          <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
-            <h3 className="text-xl font-semibold text-gray-700">Recent Appointments</h3>
-            <p className="mt-4 text-2xl font-bold text-indigo-600">8</p>
+            <p className="mt-4 text-2xl font-bold text-indigo-600">{totalDoctors}</p>
           </div>
         </div>
+
+        {/* Logout Button */}
+        <button
+          className="fixed bottom-6 left-6 p-2 text-white bg-red-500 rounded-full hover:bg-red-600 transition-colors duration-300"
+          onClick={handleLogout}
+          title="Logout"
+        >
+          <FaSignOutAlt size={24} />
+        </button>
       </main>
     </div>
   );
