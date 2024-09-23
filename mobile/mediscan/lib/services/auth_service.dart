@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:developer'; // For logging
 
 class AuthService {
-  final apiUrl = 'http://192.168.166.155:5000/api';
+  final apiUrl = 'http://192.168.130.155:5000/api';
   // Replace with your actual API URL
 
   Future<String?> login(String email, String password) async {

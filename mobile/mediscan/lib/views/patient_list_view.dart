@@ -24,13 +24,7 @@ class _PatientListViewState extends State<PatientListView> {
 
   Future<void> _loadPatients() async {
     try {
-      final token = Provider.of<AuthState>(context, listen: false).token;
-      if (token != null) {
-        await Provider.of<PatientState>(context, listen: false)
-            .fetchPatients(token);
-      } else {
-        print('No token found, user might not be logged in');
-      }
+      await Provider.of<PatientState>(context, listen: false).fetchPatients();
     } catch (e) {
       print('Error loading patients: $e');
     } finally {
@@ -49,39 +43,61 @@ class _PatientListViewState extends State<PatientListView> {
         title: const Text('Patient List'),
         backgroundColor: Colors.teal,
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : patients.isEmpty
-              ? const Center(child: Text('No patients available'))
-              : ListView.builder(
-                  itemCount: patients.length,
-                  itemBuilder: (context, index) {
-                    final patient = patients[index];
-                    return Card(
-                      margin: const EdgeInsets.symmetric(
-                          vertical: 8.0, horizontal: 16.0),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: NetworkImage(patient.imageUrl),
-                          radius: 30.0,
-                        ),
-                        title: Text(patient.name),
-                        subtitle: Text(
-                            'Age: ${patient.age}, Diagnosis: ${patient.diagnosis}'),
-                        trailing: const Icon(Icons.arrow_forward_ios),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  PatientDetailView(patientId: patient.id),
+      body: Column(
+        children: [
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : patients.isEmpty
+                    ? const Center(child: Text('No patients available'))
+                    : ListView.builder(
+                        itemCount: patients.length,
+                        itemBuilder: (context, index) {
+                          final patient = patients[index];
+                          return Card(
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 16.0),
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                backgroundImage: NetworkImage(patient.imageUrl),
+                                radius: 30.0,
+                              ),
+                              title: Text(patient.name),
+                              subtitle: Text(
+                                  'Age: ${patient.age}, Diagnosis: ${patient.diagnosis}'),
+                              trailing: const Icon(Icons.arrow_forward_ios),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PatientDetailView(
+                                      patientId: patient.id,
+                                    ),
+                                  ),
+                                );
+                              },
                             ),
                           );
                         },
                       ),
-                    );
-                  },
-                ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(
+                    context, '/profile'); // Navigate to ProfileView
+              },
+              child: const Text('Back to Profile'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue, // Set a color for the button
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 30, vertical: 15), // Adjust padding
+              ),
+            ),
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.pushNamed(context, '/add-patient');
