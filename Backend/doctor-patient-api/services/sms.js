@@ -1,7 +1,9 @@
 const twilio = require("twilio");
 
-const accountSid = "AC435425517d445cdcd3c288f2f0baf61e";
-const authToken = "242de2a4e7f0de6cec5d0eb5bc7f81a2";
+const accountSid = process.env.SID;
+const authToken = process.env.TOKEN;
+
+
 const client = twilio(accountSid, authToken);
 
 function sendSMS(to, body) {
