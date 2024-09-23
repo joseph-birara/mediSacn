@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mediscan/models/patient.dart';
 import 'package:provider/provider.dart';
@@ -27,9 +28,8 @@ class _PatientRegistrationViewState extends State<PatientRegistrationView> {
   String? _uploadedImageUrl;
   bool _isLoading = false; // Make this mutable
 
-  static const String cloudinaryUrl =
-      'https://api.cloudinary.com/v1_1/dh7erhtam/image/upload';
-  static const String uploadPreset = 'sample';
+  static String? cloudinaryUrl = dotenv.env['CLOUD_URL'];
+  static String? uploadPreset = dotenv.env['PRESET'];
 
   final ImagePicker _picker = ImagePicker();
 
@@ -49,8 +49,8 @@ class _PatientRegistrationViewState extends State<PatientRegistrationView> {
       final mimeType = imageFile.path.split('.').last;
 
       // Create the multipart request for Cloudinary
-      final request = http.MultipartRequest('POST', Uri.parse(cloudinaryUrl))
-        ..fields['upload_preset'] = uploadPreset
+      final request = http.MultipartRequest('POST', Uri.parse(cloudinaryUrl!))
+        ..fields['upload_preset'] = uploadPreset!
         ..files.add(await http.MultipartFile.fromPath('file', imageFile.path,
             contentType: MediaType('image', mimeType)));
 

@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:developer'; // For logging
 
 class AuthService {
-  final apiUrl = 'http://192.168.130.155:5000/api';
+  final apiUrl = dotenv.env['BASE_URL'];
   // Replace with your actual API URL
 
   Future<String?> login(String email, String password) async {

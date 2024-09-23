@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mediscan/views/patient_registration_view.dart';
 import 'package:mediscan/views/profile_view.dart';
 import 'package:provider/provider.dart';
@@ -9,7 +10,8 @@ import 'state/profile_state.dart';
 import 'views/login_view.dart';
 import 'views/patient_list_view.dart';
 
-void main() {
+Future<void> main() async {
+  await dotenv.load(fileName: ".env");
   runApp(MultiProvider(
     providers: [
       ChangeNotifierProvider(create: (_) => AppState()),

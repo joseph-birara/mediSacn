@@ -1,11 +1,12 @@
 import 'dart:convert';
 import 'dart:async'; // For Timeout
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import '../models/patient.dart';
 import 'auth_service.dart';
 
 class ApiService {
-  static const baseUrl = 'http://192.168.130.155:5000/api';
+  final baseUrl = dotenv.env['BASE_URL'];
   final AuthService _authService;
 
   // Inject AuthService into ApiService
