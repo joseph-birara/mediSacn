@@ -9,13 +9,28 @@ class AuthState extends ChangeNotifier {
   String? get token => _token;
   String get doctorId => _doctorId;
 
-  Future<bool> login(String username, String password) async {
-    final loginResponse = await _authService.login(username, password);
-    if (loginResponse != null) {
-      _token = loginResponse.token; // Store the token
-      _doctorId = username; // Assuming username is used as doctor ID
-      notifyListeners();
-      return true; // Login successful
+  AuthState() {
+    loadToken(); // Load token when the state is initialized
+  }
+
+  Future<void> loadToken() async {
+    _token = await _authService.getToken();
+    notifyListeners();
+  }
+
+  Future<bool> login(String email, String password) async {
+    try {
+      final token = await _authService.login(email, password);
+      if (token != null) {
+        _token = token; // Store the token
+        _doctorId = email; // Assuming email is used as doctor ID
+        notifyListeners();
+        return true; // Login successful
+      } else {
+        print('Login failed: Invalid credentials');
+      }
+    } catch (e) {
+      print('Login error: $e');
     }
     return false; // Login failed
   }
@@ -28,6 +43,11 @@ class AuthState extends ChangeNotifier {
   }
 
   Future<bool> isLoggedIn() async {
-    return await _authService.isLoggedIn();
+    _token =
+        await _authService.getToken(); // Get the token from SharedPreferences
+    if (_token != null && _token!.isNotEmpty) {
+      return true;
+    }
+    return false;
   }
 }

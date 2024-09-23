@@ -28,6 +28,7 @@ class _LoginViewState extends State<LoginView> {
         _isLoading = true;
       });
 
+      // Call the login method in AuthState
       final success = await Provider.of<AuthState>(context, listen: false)
           .login(_emailController.text, _passwordController.text);
 
@@ -36,10 +37,10 @@ class _LoginViewState extends State<LoginView> {
       });
 
       if (success) {
-        // Navigate to the patient list on successful login
+        // If login is successful, navigate to the patient list
         Navigator.pushReplacementNamed(context, '/patientList');
       } else {
-        // Show an error message if login failed
+        // If login failed, show an error message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Login failed. Please check your credentials.'),

@@ -12,7 +12,7 @@ export default function DoctorsPage() {
     name: '',
     phone: '',
     email: '',
-    image: '', // Keep this as a string
+    image: '', 
     password: ''
   });
   const [imageFile, setImageFile] = useState<File | null>(null); // Separate state for the file

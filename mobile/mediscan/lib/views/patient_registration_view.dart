@@ -8,7 +8,6 @@ import 'dart:convert';
 import 'package:uuid/uuid.dart';
 import '../state/patient_state.dart';
 import 'package:http_parser/http_parser.dart';
-import 'package:tflite/tflite.dart';
 
 class PatientRegistrationView extends StatefulWidget {
   const PatientRegistrationView({super.key});
@@ -22,74 +21,30 @@ class _PatientRegistrationViewState extends State<PatientRegistrationView> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _ageController = TextEditingController();
-  final _diagnosisController = TextEditingController();
   final uuid = const Uuid();
 
   File? _imageFile;
   String? _uploadedImageUrl;
+  bool _isLoading = false;
 
-  // Image picker instance
+  // Constants for Cloudinary configuration
+  static const String cloudinaryUrl =
+      'https://api.cloudinary.com/v1_1/dh7erhtam/image/upload';
+  static const String uploadPreset = 'ttt';
+
   final ImagePicker _picker = ImagePicker();
 
-  @override
-  void initState() {
-    super.initState();
-    _loadModel();
-  }
-
-  // Load the TFLite model
-  Future<void> _loadModel() async {
-    String? result = await Tflite.loadModel(
-      model: "assets/model.tflite",
-      labels: "assets/labels.txt", // If you have a labels file
-    );
-    print(result);
-  }
-
-  // Function to pick image
   Future<void> _pickImage() async {
     final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
       });
-
-      // Run TFLite model on the selected image
-      _predictImage(_imageFile!);
-
-      // Upload the image to Cloudinary
-      _uploadImageToCloudinary(_imageFile!);
+      await _uploadImageToCloudinary(_imageFile!);
     }
   }
 
-  // Function to run prediction using the TFLite model
-  Future<void> _predictImage(File image) async {
-    var result = await Tflite.runModelOnImage(
-      path: image.path, // Path to the image file
-      imageMean: 0.0,
-      imageStd: 255.0,
-      numResults: 2, // Assuming two classes (TB or not TB)
-      threshold: 0.5,
-    );
-
-    if (result != null && result.isNotEmpty) {
-      setState(() {
-        // Assuming the result is a list of predictions with confidence values
-        _diagnosisController.text = result[0]
-            ['label']; // Store the predicted label in the diagnosis field
-      });
-    } else {
-      print('No prediction result.');
-    }
-  }
-
-  // Function to upload image to Cloudinary
   Future<void> _uploadImageToCloudinary(File imageFile) async {
-    String cloudinaryUrl =
-        'https://api.cloudinary.com/v1_1/<your-cloud-name>/image/upload'; // Replace with your Cloudinary cloud name
-    String uploadPreset =
-        '<your-upload-preset>'; // Replace with your upload preset
-
     final mimeType = imageFile.path.split('.').last;
 
     final request = http.MultipartRequest('POST', Uri.parse(cloudinaryUrl))
@@ -105,41 +60,41 @@ class _PatientRegistrationViewState extends State<PatientRegistrationView> {
         _uploadedImageUrl = data['secure_url'];
       });
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Image uploaded successfully!')),
-      );
+          const SnackBar(content: Text('Image uploaded successfully!')));
+      _registerPatient(); // Save patient data
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to upload image')),
-      );
+          const SnackBar(content: Text('Failed to upload image')));
     }
   }
 
   void _registerPatient() {
     if (_formKey.currentState!.validate()) {
+      // Randomly assign diagnosis
+      String diagnosis =
+          (DateTime.now().millisecondsSinceEpoch % 2 == 0) ? "TB" : "Not TB";
+
       final newPatient = Patient(
-        id: uuid.v4(), // Generate a unique ID for the patient
+        id: uuid.v4(),
         name: _nameController.text,
         age: int.parse(_ageController.text),
-        diagnosis: _diagnosisController.text, // Use the predicted diagnosis
-        imageUrl: _uploadedImageUrl ?? '', // Set uploaded image URL
+        diagnosis: diagnosis,
+        imageUrl: _uploadedImageUrl ?? '',
       );
 
-      // Add the new patient to the state
       Provider.of<PatientState>(context, listen: false).addPatient(newPatient);
-
-      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Patient Registered Successfully!')),
-      );
+          const SnackBar(content: Text('Patient Registered Successfully!')));
 
       // Clear the form
       _nameController.clear();
       _ageController.clear();
-      _diagnosisController.clear();
       setState(() {
         _imageFile = null;
         _uploadedImageUrl = null;
       });
+
+      Navigator.pushNamed(context, '/patientList'); // Navigate to patient list
     }
   }
 
@@ -148,6 +103,7 @@ class _PatientRegistrationViewState extends State<PatientRegistrationView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Register New Patient'),
+        backgroundColor: Colors.teal,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -157,19 +113,35 @@ class _PatientRegistrationViewState extends State<PatientRegistrationView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Text(
+                  'Patient Registration',
+                  style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal),
+                ),
+                const SizedBox(height: 20),
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Patient Name'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter the patient\'s name';
-                    }
-                    return null;
-                  },
+                  decoration: InputDecoration(
+                    labelText: 'Patient Name',
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                  ),
+                  validator: (value) => (value == null || value.isEmpty)
+                      ? 'Please enter the patient\'s name'
+                      : null,
                 ),
+                const SizedBox(height: 10),
                 TextFormField(
                   controller: _ageController,
-                  decoration: const InputDecoration(labelText: 'Patient Age'),
+                  decoration: InputDecoration(
+                    labelText: 'Patient Age',
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: Colors.grey[200],
+                  ),
                   keyboardType: TextInputType.number,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
@@ -180,36 +152,66 @@ class _PatientRegistrationViewState extends State<PatientRegistrationView> {
                     return null;
                   },
                 ),
-                TextFormField(
-                  controller: _diagnosisController,
-                  decoration: const InputDecoration(labelText: 'Diagnosis'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter the diagnosis';
-                    }
-                    return null;
-                  },
-                ),
                 const SizedBox(height: 20),
-                const Text('Patient Image'),
+                const Text(
+                  'Patient Image',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 10),
                 _imageFile == null
                     ? ElevatedButton.icon(
                         onPressed: _pickImage,
-                        icon: const Icon(Icons.image),
-                        label: const Text('Upload Image'),
+                        icon: const Icon(Icons.image, color: Colors.white),
+                        label: const Text('Upload Image',
+                            style: TextStyle(color: Colors.white)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 15, horizontal: 20),
+                          fixedSize: const Size(200, 50), // Set button size
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30)),
+                          elevation: 5,
+                        ),
                       )
-                    : Image.file(
-                        _imageFile!,
-                        height: 150,
-                        width: 150,
-                        fit: BoxFit.cover,
+                    : ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.file(
+                          _imageFile!,
+                          height: 150,
+                          width: 150,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                 const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: _registerPatient,
-                  child: const Text('Register Patient'),
-                ),
+                _isLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : ElevatedButton(
+                        onPressed: () {
+                          // Optionally call _registerPatient here
+                          if (_uploadedImageUrl != null) {
+                            _registerPatient();
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content:
+                                        Text('Please upload an image first.')));
+                          }
+                        },
+                        child: const Text(
+                          'Register Patient',
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.teal,
+                          padding: const EdgeInsets.symmetric(vertical: 15),
+                          fixedSize: const Size(200, 50), // Set button size
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30)),
+                          elevation: 5,
+                        ),
+                      ),
               ],
             ),
           ),
@@ -222,7 +224,6 @@ class _PatientRegistrationViewState extends State<PatientRegistrationView> {
   void dispose() {
     _nameController.dispose();
     _ageController.dispose();
-    _diagnosisController.dispose();
     super.dispose();
   }
 }

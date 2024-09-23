@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mediscan/views/patient_registration_view.dart';
 import 'package:provider/provider.dart';
 import 'state/app_state.dart';
 import 'state/auth_state.dart';
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => const LoginView(),
         '/patientList': (context) => const PatientListView(),
+        '/add-patient': (context) => const PatientRegistrationView()
       },
     );
   }
